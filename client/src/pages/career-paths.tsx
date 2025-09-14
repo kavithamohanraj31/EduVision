@@ -1,89 +1,458 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import CareerPathVisualization from "@/components/career-path-visualization";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
 import { 
-  Route, 
   TrendingUp, 
-  BookOpen, 
+  DollarSign, 
   Briefcase, 
-  DollarSign,
-  Users,
-  Building,
+  GraduationCap, 
+  Target, 
+  Users, 
+  BarChart3,
   Lightbulb,
-  Target
+  Building,
+  BookOpen
 } from "lucide-react";
-import type { CareerPath } from "@shared/schema";
 
-interface CareerAnalysis {
-  career_title: string;
-  description: string;
-  salary_range: string;
-  growth_prospects: string;
-  required_skills: string[];
-  industry_areas: string[];
-  government_jobs: string[];
-  private_jobs: string[];
-  entrepreneurial_options: string[];
-}
+// Comprehensive career paths data
+const careerPathsData = {
+  Science: {
+    "B.Tech Computer Science": {
+      degree: "B.Tech Computer Science",
+      stream: "Science",
+      duration: "4 years",
+      description: "Comprehensive computer science program covering programming, algorithms, data structures, and software engineering.",
+      careerOptions: [
+        {
+          title: "Software Engineer",
+          salary: "6-25 LPA",
+          experience: "0-5 years",
+          companies: ["Google", "Microsoft", "Amazon", "TCS", "Infosys"],
+          skills: ["Programming", "Data Structures", "Algorithms", "System Design"],
+          growth: "High"
+        },
+        {
+          title: "Data Scientist",
+          salary: "8-30 LPA",
+          experience: "1-6 years",
+          companies: ["IBM", "Accenture", "Wipro", "Startups"],
+          skills: ["Machine Learning", "Python", "Statistics", "Data Analysis"],
+          growth: "Very High"
+        },
+        {
+          title: "Full Stack Developer",
+          salary: "5-20 LPA",
+          experience: "0-4 years",
+          companies: ["Startups", "Mid-size companies", "Freelancing"],
+          skills: ["Frontend", "Backend", "Database", "Cloud"],
+          growth: "High"
+        },
+        {
+          title: "DevOps Engineer",
+          salary: "7-22 LPA",
+          experience: "1-5 years",
+          companies: ["AWS", "Azure", "Google Cloud", "Tech companies"],
+          skills: ["Docker", "Kubernetes", "CI/CD", "Cloud Platforms"],
+          growth: "High"
+        }
+      ],
+      higherEducation: [
+        "M.Tech Computer Science",
+        "MS in Computer Science (Abroad)",
+        "MBA in Technology Management",
+        "PhD in Computer Science"
+      ],
+      governmentJobs: [
+        "Software Engineer in ISRO",
+        "Technical Officer in DRDO",
+        "Programmer in Government Banks",
+        "IT Officer in Government Departments"
+      ],
+      entrepreneurialOptions: [
+        "Software Development Company",
+        "Mobile App Development",
+        "SaaS Product Development",
+        "Tech Consulting"
+      ]
+    },
+    "B.Sc Chemistry": {
+      degree: "B.Sc Chemistry",
+      stream: "Science",
+      duration: "3 years",
+      description: "Study of matter, its properties, composition, and reactions. Covers organic, inorganic, and physical chemistry.",
+      careerOptions: [
+        {
+          title: "Research Scientist",
+          salary: "4-15 LPA",
+          experience: "0-5 years",
+          companies: ["CSIR Labs", "DRDO", "ISRO", "Pharmaceutical Companies"],
+          skills: ["Laboratory Techniques", "Research Methods", "Data Analysis", "Report Writing"],
+          growth: "Medium"
+        },
+        {
+          title: "Quality Control Analyst",
+          salary: "3-12 LPA",
+          experience: "0-4 years",
+          companies: ["Pharmaceutical", "Food Industry", "Chemical Companies"],
+          skills: ["Analytical Chemistry", "Quality Testing", "Documentation", "Compliance"],
+          growth: "Medium"
+        },
+        {
+          title: "Chemical Engineer",
+          salary: "5-18 LPA",
+          experience: "0-5 years",
+          companies: ["Petrochemical", "Pharmaceutical", "Manufacturing"],
+          skills: ["Process Design", "Chemical Processes", "Safety Protocols", "Project Management"],
+          growth: "Medium"
+        },
+        {
+          title: "Environmental Consultant",
+          salary: "4-14 LPA",
+          experience: "1-5 years",
+          companies: ["Environmental Agencies", "Consulting Firms", "Government"],
+          skills: ["Environmental Science", "Regulatory Compliance", "Assessment", "Reporting"],
+          growth: "High"
+        }
+      ],
+      higherEducation: [
+        "M.Sc Chemistry",
+        "M.Tech Chemical Engineering",
+        "PhD in Chemistry",
+        "MBA in Chemical Industry"
+      ],
+      governmentJobs: [
+        "Scientist in CSIR",
+        "Chemical Analyst in Government Labs",
+        "Environmental Officer",
+        "Research Officer in DRDO"
+      ],
+      entrepreneurialOptions: [
+        "Chemical Testing Laboratory",
+        "Environmental Consulting",
+        "Specialty Chemical Manufacturing",
+        "Research and Development Services"
+      ]
+    },
+    "B.Tech Mechanical Engineering": {
+      degree: "B.Tech Mechanical Engineering",
+      stream: "Science",
+      duration: "4 years",
+      description: "Design, analysis, and manufacturing of mechanical systems. Covers thermodynamics, mechanics, and materials science.",
+      careerOptions: [
+        {
+          title: "Mechanical Engineer",
+          salary: "4-20 LPA",
+          experience: "0-6 years",
+          companies: ["Automotive", "Manufacturing", "Aerospace", "Energy"],
+          skills: ["CAD/CAM", "Design", "Manufacturing", "Project Management"],
+          growth: "Medium"
+        },
+        {
+          title: "Design Engineer",
+          salary: "5-18 LPA",
+          experience: "1-5 years",
+          companies: ["Automotive", "Aerospace", "Consumer Goods", "Industrial Equipment"],
+          skills: ["SolidWorks", "AutoCAD", "FEA", "Product Design"],
+          growth: "Medium"
+        },
+        {
+          title: "Production Manager",
+          salary: "6-25 LPA",
+          experience: "2-8 years",
+          companies: ["Manufacturing", "Automotive", "Pharmaceutical", "Food Processing"],
+          skills: ["Operations", "Lean Manufacturing", "Team Management", "Quality Control"],
+          growth: "High"
+        },
+        {
+          title: "Maintenance Engineer",
+          salary: "4-15 LPA",
+          experience: "1-5 years",
+          companies: ["Power Plants", "Manufacturing", "Oil & Gas", "Infrastructure"],
+          skills: ["Equipment Maintenance", "Troubleshooting", "Preventive Maintenance", "Safety"],
+          growth: "Medium"
+        }
+      ],
+      higherEducation: [
+        "M.Tech Mechanical Engineering",
+        "MS in Mechanical Engineering (Abroad)",
+        "MBA in Operations",
+        "PhD in Mechanical Engineering"
+      ],
+      governmentJobs: [
+        "Engineer in PWD",
+        "Technical Officer in ISRO",
+        "Mechanical Engineer in Railways",
+        "Scientist in DRDO"
+      ],
+      entrepreneurialOptions: [
+        "Manufacturing Company",
+        "Engineering Consultancy",
+        "Equipment Maintenance Services",
+        "Product Design and Development"
+      ]
+    }
+  },
+  Commerce: {
+    "B.Com": {
+      degree: "B.Com",
+      stream: "Commerce",
+      duration: "3 years",
+      description: "Comprehensive commerce program covering accounting, finance, economics, and business management.",
+      careerOptions: [
+        {
+          title: "Accountant",
+          salary: "3-12 LPA",
+          experience: "0-5 years",
+          companies: ["CA Firms", "Corporate", "Government", "Banks"],
+          skills: ["Accounting", "Tally", "Taxation", "Financial Reporting"],
+          growth: "Medium"
+        },
+        {
+          title: "Financial Analyst",
+          salary: "4-18 LPA",
+          experience: "1-6 years",
+          companies: ["Investment Banks", "Mutual Funds", "Corporate Finance", "Consulting"],
+          skills: ["Financial Modeling", "Excel", "Market Analysis", "Risk Assessment"],
+          growth: "High"
+        },
+        {
+          title: "Banking Professional",
+          salary: "4-15 LPA",
+          experience: "0-5 years",
+          companies: ["Public Sector Banks", "Private Banks", "NBFCs", "Cooperative Banks"],
+          skills: ["Banking Operations", "Customer Service", "Loan Processing", "Compliance"],
+          growth: "Medium"
+        },
+        {
+          title: "Tax Consultant",
+          salary: "3-15 LPA",
+          experience: "1-6 years",
+          companies: ["CA Firms", "Tax Consultancies", "Corporate", "Freelancing"],
+          skills: ["Tax Planning", "GST", "Income Tax", "Compliance"],
+          growth: "High"
+        }
+      ],
+      higherEducation: [
+        "M.Com",
+        "MBA Finance",
+        "CA (Chartered Accountant)",
+        "CS (Company Secretary)"
+      ],
+      governmentJobs: [
+        "Banking Officer",
+        "Accountant in Government",
+        "Tax Inspector",
+        "Audit Officer"
+      ],
+      entrepreneurialOptions: [
+        "Accounting Firm",
+        "Tax Consultancy",
+        "Financial Advisory Services",
+        "Business Consultancy"
+      ]
+    },
+    "BBA": {
+      degree: "BBA",
+      stream: "Commerce",
+      duration: "3 years",
+      description: "Business administration program covering management, marketing, finance, and entrepreneurship.",
+      careerOptions: [
+        {
+          title: "Business Analyst",
+          salary: "4-16 LPA",
+          experience: "0-5 years",
+          companies: ["IT Companies", "Consulting", "Corporate", "Startups"],
+          skills: ["Data Analysis", "Process Improvement", "Project Management", "Communication"],
+          growth: "High"
+        },
+        {
+          title: "Marketing Executive",
+          salary: "3-12 LPA",
+          experience: "0-4 years",
+          companies: ["FMCG", "E-commerce", "Digital Marketing", "Advertising"],
+          skills: ["Digital Marketing", "Brand Management", "Market Research", "Social Media"],
+          growth: "High"
+        },
+        {
+          title: "HR Executive",
+          salary: "3-10 LPA",
+          experience: "0-4 years",
+          companies: ["Corporate", "Consulting", "IT", "Manufacturing"],
+          skills: ["Recruitment", "Employee Relations", "HR Policies", "Training"],
+          growth: "Medium"
+        },
+        {
+          title: "Operations Manager",
+          salary: "5-20 LPA",
+          experience: "2-8 years",
+          companies: ["Manufacturing", "Logistics", "Retail", "E-commerce"],
+          skills: ["Operations Management", "Process Optimization", "Team Leadership", "Supply Chain"],
+          growth: "High"
+        }
+      ],
+      higherEducation: [
+        "MBA",
+        "M.Com",
+        "PGDM",
+        "MS in Business (Abroad)"
+      ],
+      governmentJobs: [
+        "Administrative Officer",
+        "Manager in PSUs",
+        "Banking Officer",
+        "Government Consultant"
+      ],
+      entrepreneurialOptions: [
+        "Startup Company",
+        "Business Consultancy",
+        "Digital Marketing Agency",
+        "Training and Development"
+      ]
+    }
+  },
+  Arts: {
+    "B.A English Literature": {
+      degree: "B.A English Literature",
+      stream: "Arts",
+      duration: "3 years",
+      description: "Study of English literature, language, and communication. Covers poetry, prose, drama, and critical analysis.",
+      careerOptions: [
+        {
+          title: "Content Writer",
+          salary: "2-10 LPA",
+          experience: "0-4 years",
+          companies: ["Digital Marketing", "Publishing", "E-learning", "Freelancing"],
+          skills: ["Writing", "SEO", "Research", "Editing"],
+          growth: "High"
+        },
+        {
+          title: "Journalist",
+          salary: "3-12 LPA",
+          experience: "0-5 years",
+          companies: ["Newspapers", "TV Channels", "Online Media", "Magazines"],
+          skills: ["News Writing", "Interviewing", "Research", "Media Ethics"],
+          growth: "Medium"
+        },
+        {
+          title: "Teacher/Professor",
+          salary: "3-15 LPA",
+          experience: "0-10 years",
+          companies: ["Schools", "Colleges", "Universities", "Coaching Centers"],
+          skills: ["Teaching", "Curriculum Development", "Student Assessment", "Communication"],
+          growth: "Medium"
+        },
+        {
+          title: "Editor",
+          salary: "4-14 LPA",
+          experience: "1-6 years",
+          companies: ["Publishing Houses", "Media", "Corporate", "Freelancing"],
+          skills: ["Editing", "Proofreading", "Content Strategy", "Project Management"],
+          growth: "Medium"
+        }
+      ],
+      higherEducation: [
+        "M.A English Literature",
+        "M.A Journalism",
+        "M.A Mass Communication",
+        "B.Ed for Teaching"
+      ],
+      governmentJobs: [
+        "Teacher in Government Schools",
+        "Content Writer in Government",
+        "Editor in Government Publications",
+        "Public Relations Officer"
+      ],
+      entrepreneurialOptions: [
+        "Content Writing Agency",
+        "Publishing House",
+        "Online Education Platform",
+        "Media and Communication Services"
+      ]
+    },
+    "B.A Economics": {
+      degree: "B.A Economics",
+      stream: "Arts",
+      duration: "3 years",
+      description: "Study of economic theories, policies, and market dynamics. Covers microeconomics, macroeconomics, and econometrics.",
+      careerOptions: [
+        {
+          title: "Economic Analyst",
+          salary: "4-15 LPA",
+          experience: "0-5 years",
+          companies: ["Research Institutes", "Banks", "Government", "Think Tanks"],
+          skills: ["Economic Analysis", "Data Analysis", "Research", "Report Writing"],
+          growth: "Medium"
+        },
+        {
+          title: "Policy Analyst",
+          salary: "5-18 LPA",
+          experience: "1-6 years",
+          companies: ["Government", "International Organizations", "NGOs", "Consulting"],
+          skills: ["Policy Research", "Data Analysis", "Stakeholder Engagement", "Report Writing"],
+          growth: "Medium"
+        },
+        {
+          title: "Research Associate",
+          salary: "3-12 LPA",
+          experience: "0-4 years",
+          companies: ["Universities", "Research Institutes", "Banks", "Consulting"],
+          skills: ["Research Methods", "Data Collection", "Analysis", "Academic Writing"],
+          growth: "Medium"
+        },
+        {
+          title: "Business Development Manager",
+          salary: "5-20 LPA",
+          experience: "2-8 years",
+          companies: ["Corporate", "Startups", "Consulting", "Financial Services"],
+          skills: ["Market Analysis", "Strategy", "Client Relations", "Project Management"],
+          growth: "High"
+        }
+      ],
+      higherEducation: [
+        "M.A Economics",
+        "M.A Public Policy",
+        "MBA",
+        "PhD in Economics"
+      ],
+      governmentJobs: [
+        "Economic Officer",
+        "Research Officer",
+        "Policy Analyst in Government",
+        "Statistical Officer"
+      ],
+      entrepreneurialOptions: [
+        "Economic Consultancy",
+        "Research and Analysis Services",
+        "Policy Advisory",
+        "Data Analytics Company"
+      ]
+    }
+  }
+};
 
 export default function CareerPaths() {
-  const { toast } = useToast();
-  const [selectedStream, setSelectedStream] = useState<string>("");
-  const [selectedDegree, setSelectedDegree] = useState<string>("");
-  const [analysisData, setAnalysisData] = useState<CareerAnalysis | null>(null);
+  const [selectedStream, setSelectedStream] = useState<string>("Science");
+  const [selectedDegree, setSelectedDegree] = useState<string>("B.Tech Computer Science");
+  const [showAnalysis, setShowAnalysis] = useState(false);
 
-  // Fetch career paths
-  const { data: careerPaths, isLoading, error } = useQuery<CareerPath[]>({
-    queryKey: ["/api/career-paths", { 
-      stream: selectedStream || undefined,
-      degree: selectedDegree || undefined
-    }],
-    retry: false,
-  });
-
-  // Career analysis mutation
-  const analyzeCareerMutation = useMutation({
-    mutationFn: async ({ degree, stream }: { degree: string; stream: string }) => {
-      const response = await apiRequest("POST", "/api/career-paths/analyze", { degree, stream });
-      return response.json();
-    },
-    onSuccess: (data) => {
-      setAnalysisData(data);
-    },
-    onError: (error) => {
-      toast({
-        title: "Analysis Failed",
-        description: "Failed to analyze career path. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const streams = ["Science", "Commerce", "Arts", "Vocational"];
-  const degreesByStream: Record<string, string[]> = {
-    Science: ["B.Sc. Computer Science", "B.Sc. Physics", "B.Sc. Chemistry", "B.Sc. Mathematics", "B.Sc. Biology", "B.Tech", "B.E.", "MBBS", "B.Pharmacy"],
-    Commerce: ["B.Com", "BBA", "B.Com (Hons)", "BCA", "B.A. Economics"],
-    Arts: ["B.A. English", "B.A. History", "B.A. Psychology", "B.A. Sociology", "B.A. Political Science", "B.A. Philosophy", "BFA", "B.A. Journalism"],
-    Vocational: ["Diploma in Engineering", "ITI Courses", "Polytechnic", "Certificate Courses"]
-  };
+  const streams = Object.keys(careerPathsData);
+  const degrees = selectedStream ? Object.keys(careerPathsData[selectedStream as keyof typeof careerPathsData]) : [];
+  const currentCareerData = selectedStream && selectedDegree ? careerPathsData[selectedStream as keyof typeof careerPathsData][selectedDegree as keyof typeof careerPathsData[typeof selectedStream]] : null;
 
   const handleAnalyze = () => {
-    if (selectedDegree && selectedStream) {
-      analyzeCareerMutation.mutate({ degree: selectedDegree, stream: selectedStream });
-    }
+    setShowAnalysis(true);
+  };
+
+  const resetAnalysis = () => {
+    setShowAnalysis(false);
   };
 
   return (
-    <div className="min-h-screen bg-background" data-testid="career-paths-page">
+    <div className="min-h-screen bg-background">
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -97,8 +466,8 @@ export default function CareerPaths() {
           </p>
         </div>
 
-        {/* Stream and Degree Selection */}
-        <Card className="mb-8" data-testid="selection-card">
+        {/* Selection Card */}
+        <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5" />
@@ -109,15 +478,12 @@ export default function CareerPaths() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Stream</label>
-                <Select
-                  value={selectedStream}
-                  onValueChange={(value) => {
-                    setSelectedStream(value);
-                    setSelectedDegree(""); // Reset degree when stream changes
-                    setAnalysisData(null); // Clear analysis
-                  }}
-                >
-                  <SelectTrigger data-testid="stream-select">
+                <Select value={selectedStream} onValueChange={(value) => {
+                  setSelectedStream(value);
+                  setSelectedDegree(Object.keys(careerPathsData[value as keyof typeof careerPathsData])[0]);
+                  setShowAnalysis(false);
+                }}>
+                  <SelectTrigger>
                     <SelectValue placeholder="Select stream" />
                   </SelectTrigger>
                   <SelectContent>
@@ -132,19 +498,15 @@ export default function CareerPaths() {
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Degree Program</label>
-                <Select
-                  value={selectedDegree}
-                  onValueChange={(value) => {
-                    setSelectedDegree(value);
-                    setAnalysisData(null); // Clear analysis
-                  }}
-                  disabled={!selectedStream}
-                >
-                  <SelectTrigger data-testid="degree-select">
+                <Select value={selectedDegree} onValueChange={(value) => {
+                  setSelectedDegree(value);
+                  setShowAnalysis(false);
+                }}>
+                  <SelectTrigger>
                     <SelectValue placeholder="Select degree" />
                   </SelectTrigger>
                   <SelectContent>
-                    {selectedStream && degreesByStream[selectedStream]?.map((degree) => (
+                    {degrees.map((degree) => (
                       <SelectItem key={degree} value={degree}>
                         {degree}
                       </SelectItem>
@@ -154,297 +516,212 @@ export default function CareerPaths() {
               </div>
             </div>
 
-            <Button
-              onClick={handleAnalyze}
-              disabled={!selectedDegree || !selectedStream || analyzeCareerMutation.isPending}
-              className="w-full md:w-auto"
-              data-testid="analyze-button"
-            >
-              {analyzeCareerMutation.isPending ? "Analyzing..." : "Get AI-Powered Career Analysis"}
+            <Button onClick={handleAnalyze} className="w-full md:w-auto">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Get AI-Powered Career Analysis
             </Button>
           </CardContent>
         </Card>
 
-        {/* AI Career Analysis Results */}
-        {analysisData && (
-          <Card className="mb-8" data-testid="analysis-results">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                AI Career Analysis: {analysisData.career_title}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="overview" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="skills">Skills</TabsTrigger>
-                  <TabsTrigger value="opportunities">Jobs</TabsTrigger>
-                  <TabsTrigger value="entrepreneurship">Business</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="overview" className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Card>
-                      <CardContent className="p-6">
-                        <div className="flex items-center gap-3 mb-4">
-                          <DollarSign className="h-5 w-5 text-accent" />
-                          <h4 className="font-semibold">Salary Range</h4>
-                        </div>
-                        <p className="text-2xl font-bold text-accent">{analysisData.salary_range}</p>
-                        <p className="text-sm text-muted-foreground mt-2">Expected starting salary in India</p>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardContent className="p-6">
-                        <div className="flex items-center gap-3 mb-4">
-                          <TrendingUp className="h-5 w-5 text-secondary" />
-                          <h4 className="font-semibold">Growth Prospects</h4>
-                        </div>
-                        <p className="text-sm leading-relaxed">{analysisData.growth_prospects}</p>
-                      </CardContent>
-                    </Card>
+        {/* Career Analysis Results */}
+        {showAnalysis && currentCareerData && (
+          <div className="space-y-8">
+            {/* Career Path Summary */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  Career Path Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="text-center p-4 bg-primary/10 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{currentCareerData.careerOptions.length}</div>
+                    <div className="text-sm text-muted-foreground">Career Options</div>
                   </div>
+                  <div className="text-center p-4 bg-secondary/10 rounded-lg">
+                    <div className="text-2xl font-bold text-secondary">{currentCareerData.higherEducation.length}</div>
+                    <div className="text-sm text-muted-foreground">Higher Education</div>
+                  </div>
+                  <div className="text-center p-4 bg-accent/10 rounded-lg">
+                    <div className="text-2xl font-bold text-accent">{currentCareerData.governmentJobs.length}</div>
+                    <div className="text-sm text-muted-foreground">Government Jobs</div>
+                  </div>
+                  <div className="text-center p-4 bg-green-100 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">{currentCareerData.entrepreneurialOptions.length}</div>
+                    <div className="text-sm text-muted-foreground">Entrepreneurial Options</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-                  <Card>
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-3 mb-4">
-                        <BookOpen className="h-5 w-5 text-primary" />
-                        <h4 className="font-semibold">Career Description</h4>
+            {/* Degree Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <GraduationCap className="h-5 w-5" />
+                  {currentCareerData.degree}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <span className="font-semibold">Stream:</span> {currentCareerData.stream}
+                  </div>
+                  <div>
+                    <span className="font-semibold">Duration:</span> {currentCareerData.duration}
+                  </div>
+                  <div>
+                    <span className="font-semibold">Type:</span> Undergraduate
+                  </div>
+                </div>
+                <p className="text-muted-foreground">{currentCareerData.description}</p>
+              </CardContent>
+            </Card>
+
+            {/* Career Options */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Briefcase className="h-5 w-5" />
+                  Career Options
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {currentCareerData.careerOptions.map((career, index) => (
+                    <div key={index} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start mb-3">
+                        <h3 className="font-semibold text-lg">{career.title}</h3>
+                        <Badge variant={career.growth === "High" || career.growth === "Very High" ? "default" : "secondary"}>
+                          {career.growth} Growth
+                        </Badge>
                       </div>
-                      <p className="leading-relaxed">{analysisData.description}</p>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
+                      
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-4 w-4 text-green-600" />
+                          <span className="font-medium text-green-600">{career.salary}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Users className="h-4 w-4 text-blue-600" />
+                          <span className="text-sm">{career.experience}</span>
+                        </div>
+                      </div>
 
-                <TabsContent value="skills" className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Card>
-                      <CardContent className="p-6">
-                        <h4 className="font-semibold mb-4">Required Skills</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {analysisData.required_skills.map((skill, index) => (
-                            <Badge key={index} variant="secondary" data-testid={`skill-${index}`}>
+                      <div className="mb-3">
+                        <h4 className="font-medium mb-2">Top Companies:</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {career.companies.map((company, idx) => (
+                            <Badge key={idx} variant="outline" className="text-xs">
+                              {company}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium mb-2">Key Skills:</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {career.skills.map((skill, idx) => (
+                            <Badge key={idx} variant="secondary" className="text-xs">
                               {skill}
                             </Badge>
                           ))}
                         </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardContent className="p-6">
-                        <h4 className="font-semibold mb-4">Industry Areas</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {analysisData.industry_areas.map((area, index) => (
-                            <Badge key={index} variant="outline" data-testid={`industry-${index}`}>
-                              {area}
-                            </Badge>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="opportunities" className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Card>
-                      <CardContent className="p-6">
-                        <div className="flex items-center gap-3 mb-4">
-                          <Building className="h-5 w-5 text-primary" />
-                          <h4 className="font-semibold">Government Jobs</h4>
-                        </div>
-                        <ul className="space-y-2">
-                          {analysisData.government_jobs.map((job, index) => (
-                            <li key={index} className="text-sm flex items-start gap-2" data-testid={`gov-job-${index}`}>
-                              <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
-                              {job}
-                            </li>
-                          ))}
-                        </ul>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardContent className="p-6">
-                        <div className="flex items-center gap-3 mb-4">
-                          <Briefcase className="h-5 w-5 text-secondary" />
-                          <h4 className="font-semibold">Private Sector</h4>
-                        </div>
-                        <ul className="space-y-2">
-                          {analysisData.private_jobs.map((job, index) => (
-                            <li key={index} className="text-sm flex items-start gap-2" data-testid={`private-job-${index}`}>
-                              <div className="w-1.5 h-1.5 bg-secondary rounded-full mt-2 flex-shrink-0" />
-                              {job}
-                            </li>
-                          ))}
-                        </ul>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="entrepreneurship" className="space-y-6">
-                  <Card>
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-3 mb-4">
-                        <Lightbulb className="h-5 w-5 text-accent" />
-                        <h4 className="font-semibold">Entrepreneurial Opportunities</h4>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {analysisData.entrepreneurial_options.map((option, index) => (
-                          <div key={index} className="p-4 border border-border rounded-lg" data-testid={`entrepreneur-option-${index}`}>
-                            <div className="flex items-start gap-3">
-                              <div className="w-2 h-2 bg-accent rounded-full mt-2 flex-shrink-0" />
-                              <p className="text-sm">{option}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Career Path Visualization */}
-        {selectedStream && (
-          <CareerPathVisualization 
-            stream={selectedStream} 
-            degree={selectedDegree} 
-            careerPaths={careerPaths || []}
-            isLoading={isLoading}
-          />
-        )}
-
-        {/* Career Paths List */}
-        {careerPaths && careerPaths.length > 0 && (
-          <Card className="mt-8" data-testid="career-paths-list">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Route className="h-5 w-5" />
-                Available Career Paths
-                {selectedStream && <Badge variant="secondary">{selectedStream}</Badge>}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {careerPaths.map((path) => (
-                  <Card key={path.id} className="card-hover" data-testid={`career-path-${path.id}`}>
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-3 mb-4">
-                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                          <Briefcase className="h-5 w-5 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-semibold mb-1">{path.careerTitle}</h4>
-                          <div className="flex gap-2 mb-2">
-                            <Badge variant="outline" className="text-xs">{path.degree}</Badge>
-                            <Badge variant="secondary" className="text-xs">{path.stream}</Badge>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {path.description && (
-                        <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
-                          {path.description}
-                        </p>
-                      )}
-
-                      {path.salaryRange && (
-                        <div className="flex items-center gap-2 mb-2">
-                          <DollarSign className="h-4 w-4 text-accent" />
-                          <span className="text-sm font-medium">{path.salaryRange}</span>
-                        </div>
-                      )}
-
-                      {path.requiredSkills && path.requiredSkills.length > 0 && (
-                        <div className="mb-4">
-                          <p className="text-xs font-medium text-muted-foreground mb-2">Key Skills:</p>
-                          <div className="flex flex-wrap gap-1">
-                            {path.requiredSkills.slice(0, 3).map((skill, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">
-                                {skill}
-                              </Badge>
-                            ))}
-                            {path.requiredSkills.length > 3 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{path.requiredSkills.length - 3} more
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full"
-                        onClick={() => {
-                          setSelectedDegree(path.degree);
-                          setSelectedStream(path.stream);
-                          analyzeCareerMutation.mutate({ degree: path.degree, stream: path.stream });
-                        }}
-                        data-testid={`analyze-path-${path.id}`}
-                      >
-                        Analyze This Path
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Loading State */}
-        {isLoading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" data-testid="loading-state">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i}>
-                <CardContent className="p-6">
-                  <div className="animate-pulse space-y-4">
-                    <div className="h-6 bg-muted rounded w-3/4" />
-                    <div className="h-4 bg-muted rounded w-1/2" />
-                    <div className="space-y-2">
-                      <div className="h-3 bg-muted rounded" />
-                      <div className="h-3 bg-muted rounded w-5/6" />
                     </div>
-                    <div className="flex gap-2">
-                      <div className="h-6 bg-muted rounded w-16" />
-                      <div className="h-6 bg-muted rounded w-20" />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Higher Education Options */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5" />
+                  Higher Education Options
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {currentCareerData.higherEducation.map((option, index) => (
+                    <div key={index} className="p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center gap-2">
+                        <GraduationCap className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-medium">{option}</span>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Government Jobs */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building className="h-5 w-5" />
+                  Government Job Opportunities
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {currentCareerData.governmentJobs.map((job, index) => (
+                    <div key={index} className="p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center gap-2">
+                        <Building className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm font-medium">{job}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Entrepreneurial Options */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Lightbulb className="h-5 w-5" />
+                  Entrepreneurial Opportunities
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {currentCareerData.entrepreneurialOptions.map((option, index) => (
+                    <div key={index} className="p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center gap-2">
+                        <Lightbulb className="h-4 w-4 text-yellow-600" />
+                        <span className="text-sm font-medium">{option}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Action Buttons */}
+            <div className="flex justify-center gap-4">
+              <Button onClick={resetAnalysis} variant="outline">
+                Analyze Different Path
+              </Button>
+              <Button asChild>
+                <a href="/assessment">Take Career Assessment</a>
+              </Button>
+            </div>
           </div>
         )}
 
-        {/* Error State */}
-        {error && (
-          <Card data-testid="error-state">
-            <CardContent className="p-8 text-center">
-              <Route className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Error Loading Career Paths</h3>
-              <p className="text-muted-foreground">
-                {(error as Error).message || "Failed to load career path data"}
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Info Section */}
-        <Card className="mt-12 bg-muted/50" data-testid="info-section">
+        <Card className="mt-12 bg-muted/50">
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
               <div>
                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <TrendingUp className="h-6 w-6 text-primary" />
+                  <BarChart3 className="h-6 w-6 text-primary" />
                 </div>
                 <h4 className="font-semibold mb-2">AI-Powered Analysis</h4>
                 <p className="text-sm text-muted-foreground">
@@ -453,7 +730,7 @@ export default function CareerPaths() {
               </div>
               <div>
                 <div className="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="h-6 w-6 text-secondary" />
+                  <TrendingUp className="h-6 w-6 text-secondary" />
                 </div>
                 <h4 className="font-semibold mb-2">Real Market Data</h4>
                 <p className="text-sm text-muted-foreground">
@@ -462,11 +739,11 @@ export default function CareerPaths() {
               </div>
               <div>
                 <div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Route className="h-6 w-6 text-accent" />
+                  <Target className="h-6 w-6 text-accent" />
                 </div>
-                <h4 className="font-semibold mb-2">Comprehensive Pathways</h4>
+                <h4 className="font-semibold mb-2">Comprehensive Guidance</h4>
                 <p className="text-sm text-muted-foreground">
-                  Explore government jobs, private sector opportunities, and entrepreneurial options.
+                  Complete career roadmap including education, skills, and growth opportunities.
                 </p>
               </div>
             </div>

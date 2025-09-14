@@ -1,122 +1,118 @@
 import { sql, relations } from 'drizzle-orm';
 import {
   index,
-  jsonb,
-  pgTable,
-  timestamp,
-  varchar,
+  sqliteTable,
   text,
   integer,
-  boolean,
-  decimal,
-} from "drizzle-orm/pg-core";
+  real,
+} from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Session storage table.
 // (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
-export const sessions = pgTable(
+export const sessions = sqliteTable(
   "sessions",
   {
-    sid: varchar("sid").primaryKey(),
-    sess: jsonb("sess").notNull(),
-    expire: timestamp("expire").notNull(),
+    sid: text("sid").primaryKey(),
+    sess: text("sess").notNull(),
+    expire: integer("expire").notNull(),
   },
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
 // User storage table.
 // (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: varchar("email").unique(),
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
-  profileImageUrl: varchar("profile_image_url"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  email: text("email").unique(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  profileImageUrl: text("profile_image_url"),
+  createdAt: integer("created_at").$defaultFn(() => Date.now()),
+  updatedAt: integer("updated_at").$defaultFn(() => Date.now()),
   // Additional fields for education platform
-  currentClass: varchar("current_class"), // 10, 12, Graduate
-  interests: text("interests").array(), // Array of interest areas
-  assessmentCompleted: boolean("assessment_completed").default(false),
+  currentClass: text("current_class"), // 10, 12, Graduate
+  interests: text("interests"), // JSON string of interest areas
+  assessmentCompleted: integer("assessment_completed", { mode: 'boolean' }).default(false),
 });
 
-export const colleges = pgTable("colleges", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: varchar("name").notNull(),
-  location: varchar("location").notNull(),
-  state: varchar("state").notNull(),
-  city: varchar("city").notNull(),
-  type: varchar("type").notNull(), // Government, Private, etc.
-  courses: text("courses").array(), // Array of available courses
-  facilities: text("facilities").array(), // Array of facilities
-  cutoffs: jsonb("cutoffs"), // Course-wise cutoff marks
-  fees: jsonb("fees"), // Course-wise fee structure
-  website: varchar("website"),
-  phone: varchar("phone"),
-  email: varchar("email"),
-  latitude: decimal("latitude"),
-  longitude: decimal("longitude"),
-  createdAt: timestamp("created_at").defaultNow(),
+export const colleges = sqliteTable("colleges", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  location: text("location").notNull(),
+  state: text("state").notNull(),
+  city: text("city").notNull(),
+  type: text("type").notNull(), // Government, Private, etc.
+  courses: text("courses"), // JSON string of available courses
+  facilities: text("facilities"), // JSON string of facilities
+  cutoffs: text("cutoffs"), // JSON string of course-wise cutoff marks
+  fees: text("fees"), // JSON string of course-wise fee structure
+  website: text("website"),
+  phone: text("phone"),
+  email: text("email"),
+  latitude: real("latitude"),
+  longitude: real("longitude"),
+  createdAt: integer("created_at").$defaultFn(() => Date.now()),
 });
 
-export const assessmentQuestions = pgTable("assessment_questions", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  category: varchar("category").notNull(), // aptitude, interest, personality
+export const assessmentQuestions = sqliteTable("assessment_questions", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  category: text("category").notNull(), // aptitude, interest, personality
   question: text("question").notNull(),
-  options: jsonb("options").notNull(), // Array of options with weights
-  stream: varchar("stream"), // science, commerce, arts, vocational
-  createdAt: timestamp("created_at").defaultNow(),
+  options: text("options").notNull(), // JSON string of options with weights
+  stream: text("stream"), // science, commerce, arts, vocational
+  createdAt: integer("created_at").$defaultFn(() => Date.now()),
 });
 
-export const userAssessments = pgTable("user_assessments", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id),
-  questionId: varchar("question_id").notNull().references(() => assessmentQuestions.id),
-  answer: varchar("answer").notNull(),
-  completedAt: timestamp("completed_at").defaultNow(),
+export const userAssessments = sqliteTable("user_assessments", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id").notNull().references(() => users.id),
+  questionId: text("question_id").notNull().references(() => assessmentQuestions.id),
+  answer: text("answer").notNull(),
+  completedAt: integer("completed_at").$defaultFn(() => Date.now()),
 });
 
-export const careerPaths = pgTable("career_paths", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  degree: varchar("degree").notNull(), // B.A., B.Sc., B.Com., etc.
-  stream: varchar("stream").notNull(), // Arts, Science, Commerce
-  careerTitle: varchar("career_title").notNull(),
+export const careerPaths = sqliteTable("career_paths", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  degree: text("degree").notNull(), // B.A., B.Sc., B.Com., etc.
+  stream: text("stream").notNull(), // Arts, Science, Commerce
+  careerTitle: text("career_title").notNull(),
   description: text("description"),
-  salaryRange: varchar("salary_range"),
+  salaryRange: text("salary_range"),
   growthProspects: text("growth_prospects"),
-  requiredSkills: text("required_skills").array(),
-  industryAreas: text("industry_areas").array(),
-  higherEducationPaths: text("higher_education_paths").array(),
-  governmentJobs: text("government_jobs").array(),
-  privateJobs: text("private_jobs").array(),
-  entrepreneurialOptions: text("entrepreneurial_options").array(),
-  createdAt: timestamp("created_at").defaultNow(),
+  requiredSkills: text("required_skills"), // JSON string
+  industryAreas: text("industry_areas"), // JSON string
+  higherEducationPaths: text("higher_education_paths"), // JSON string
+  governmentJobs: text("government_jobs"), // JSON string
+  privateJobs: text("private_jobs"), // JSON string
+  entrepreneurialOptions: text("entrepreneurial_options"), // JSON string
+  createdAt: integer("created_at").$defaultFn(() => Date.now()),
 });
 
-export const timelineEvents = pgTable("timeline_events", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  title: varchar("title").notNull(),
+export const timelineEvents = sqliteTable("timeline_events", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  title: text("title").notNull(),
   description: text("description"),
-  eventDate: timestamp("event_date").notNull(),
-  type: varchar("type").notNull(), // admission, scholarship, exam, counseling
-  registrationStart: timestamp("registration_start"),
-  registrationEnd: timestamp("registration_end"),
+  eventDate: integer("event_date").notNull(),
+  type: text("type").notNull(), // admission, scholarship, exam, counseling
+  registrationStart: integer("registration_start"),
+  registrationEnd: integer("registration_end"),
   eligibility: text("eligibility"),
-  website: varchar("website"),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
+  website: text("website"),
+  isActive: integer("is_active", { mode: 'boolean' }).default(true),
+  createdAt: integer("created_at").$defaultFn(() => Date.now()),
 });
 
-export const userRecommendations = pgTable("user_recommendations", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id),
-  recommendationType: varchar("recommendation_type").notNull(), // stream, college, career
-  recommendedItem: varchar("recommended_item").notNull(),
-  confidence: decimal("confidence", { precision: 3, scale: 2 }),
+export const userRecommendations = sqliteTable("user_recommendations", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id").notNull().references(() => users.id),
+  recommendationType: text("recommendation_type").notNull(), // stream, college, career
+  recommendedItem: text("recommended_item").notNull(),
+  confidence: real("confidence"),
   reasoning: text("reasoning"),
-  aiModel: varchar("ai_model"), // gpt-5
-  createdAt: timestamp("created_at").defaultNow(),
+  aiModel: text("ai_model"), // gpt-5
+  createdAt: integer("created_at").$defaultFn(() => Date.now()),
 });
 
 // Relations

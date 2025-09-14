@@ -66,22 +66,37 @@ export class DatabaseStorage implements IStorage {
   // User operations
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+    if (!user) return undefined;
+    
+    // Convert JSON strings back to arrays
+    return {
+      ...user,
+      interests: user.interests ? JSON.parse(user.interests) : [],
+    };
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
+    // Convert arrays to JSON strings for SQLite
+    const processedData = {
+      ...userData,
+      interests: userData.interests ? JSON.stringify(userData.interests) : null,
+      updatedAt: Date.now(),
+    };
+
     const [user] = await db
       .insert(users)
-      .values(userData)
+      .values(processedData)
       .onConflictDoUpdate({
         target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
+        set: processedData,
       })
       .returning();
-    return user;
+    
+    // Convert JSON strings back to arrays
+    return {
+      ...user,
+      interests: user.interests ? JSON.parse(user.interests) : [],
+    };
   }
 
   // College operations
@@ -115,7 +130,16 @@ export class DatabaseStorage implements IStorage {
       query = query.offset(filters.offset);
     }
     
-    return await query;
+    const results = await query;
+    
+    // Convert JSON strings back to objects/arrays
+    return results.map(college => ({
+      ...college,
+      courses: college.courses ? JSON.parse(college.courses) : [],
+      facilities: college.facilities ? JSON.parse(college.facilities) : [],
+      cutoffs: college.cutoffs ? JSON.parse(college.cutoffs) : {},
+      fees: college.fees ? JSON.parse(college.fees) : {},
+    }));
   }
 
   async getCollegeById(id: string): Promise<College | undefined> {
@@ -124,8 +148,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCollege(college: InsertCollege): Promise<College> {
-    const [newCollege] = await db.insert(colleges).values(college).returning();
-    return newCollege;
+    // Convert arrays to JSON strings for SQLite
+    const processedCollege = {
+      ...college,
+      courses: college.courses ? JSON.stringify(college.courses) : null,
+      facilities: college.facilities ? JSON.stringify(college.facilities) : null,
+      cutoffs: college.cutoffs ? JSON.stringify(college.cutoffs) : null,
+      fees: college.fees ? JSON.stringify(college.fees) : null,
+    };
+
+    const [newCollege] = await db.insert(colleges).values(processedCollege).returning();
+    
+    // Convert JSON strings back to objects/arrays
+    return {
+      ...newCollege,
+      courses: newCollege.courses ? JSON.parse(newCollege.courses) : [],
+      facilities: newCollege.facilities ? JSON.parse(newCollege.facilities) : [],
+      cutoffs: newCollege.cutoffs ? JSON.parse(newCollege.cutoffs) : {},
+      fees: newCollege.fees ? JSON.parse(newCollege.fees) : {},
+    };
   }
 
   async searchCollegesByLocation(location: string, radius?: number): Promise<College[]> {

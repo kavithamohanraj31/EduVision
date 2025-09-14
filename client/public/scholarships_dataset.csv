@@ -1,0 +1,21 @@
+Scholarship_ID,Name,Category,Eligibility,Amount,Last_Date
+TN_SC001,Tamil Nadu BC Scholarship,Caste-based,BC Students with family income < 2.5 LPA,5000,31-Aug-2024
+TN_SC002,Dr. Abdul Kalam Scholarship,Merit-based,Engineering students with 85%+ marks,10000,30-Sep-2024
+TN_SC003,Tamil Nadu SC/ST Scholarship,Caste-based,SC/ST students in higher education,8000,15-Oct-2024
+TN_SC004,Chief Minister's Scholarship for Girls,Gender-based,Girl students in professional courses,12000,31-Jul-2024
+TN_SC005,Minority Scholarship Tamil Nadu,Minority,Muslim/Christian students with 60%+ marks,6000,30-Nov-2024
+TN_SC006,Inspire Scholarship Tamil Nadu,Merit-based,Top 1% students in Class 12,80000,30-Jun-2024
+TN_SC007,Tamil Nadu Merit Scholarship,Merit-based,Students with 90%+ in Class 12,15000,31-Aug-2024
+TN_SC008,Economic Weaker Section Scholarship,Income-based,Family income < 1 LPA,7500,30-Sep-2024
+TN_SC009,Sports Scholarship Tamil Nadu,Sports,State/National level sports persons,20000,31-Oct-2024
+TN_SC010,Fishermen Community Scholarship,Community-based,Children of fishermen families,4000,15-Sep-2024
+TN_SC011,Tamil Nadu Professional Course Scholarship,Category-based,Medical/Engineering students from rural areas,25000,31-Jul-2024
+TN_SC012,Widow Pension Scholarship,Social,Children of widowed mothers,5500,30-Aug-2024
+TN_SC013,Disabled Students Scholarship,Disability-based,Students with 40%+ disability,8500,31-Oct-2024
+TN_SC014,Post Matric Scholarship Tamil Nadu,Education-based,Students pursuing higher education,6500,30-Sep-2024
+TN_SC015,Tamil Medium Students Scholarship,Language-based,Students from Tamil medium schools,3500,31-Aug-2024
+TN_SC016,First Generation Graduate Scholarship,Family-based,First in family to pursue higher education,9000,15-Oct-2024
+TN_SC017,Rural Area Students Scholarship,Location-based,Students from villages with < 20000 population,4500,30-Nov-2024
+TN_SC018,Tamil Nadu Research Scholarship,Academic,Students pursuing M.Phil/PhD,15000,31-Dec-2024
+TN_SC019,Artisan Community Scholarship,Community-based,Children of traditional artisans,5000,30-Sep-2024
+TN_SC020,Agriculture Students Scholarship,Field-based,Students in agriculture and allied courses,7000,31-Aug-2024

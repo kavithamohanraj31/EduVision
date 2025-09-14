@@ -1,20 +1,10 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { GraduationCap, Menu, User, LogOut } from "lucide-react";
+import { GraduationCap, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export default function Header() {
   const [location] = useLocation();
-  const { user, isAuthenticated, isLoading } = useAuth();
 
   const navigation = [
     { name: "Dashboard", href: "/", icon: "home" },
@@ -59,57 +49,9 @@ export default function Header() {
           </div>
 
           <div className="flex items-center space-x-4">
-            {isLoading ? (
-              <div className="w-8 h-8 bg-muted rounded-full animate-pulse" />
-            ) : isAuthenticated && user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild data-testid="user-menu-trigger">
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage
-                        src={user.profileImageUrl || undefined}
-                        alt={`${user.firstName} ${user.lastName}`}
-                      />
-                      <AvatarFallback>
-                        {user.firstName?.[0] || user.email?.[0] || <User className="h-4 w-4" />}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end">
-                  <div className="flex items-center justify-start gap-2 p-2">
-                    <div className="flex flex-col space-y-1 leading-none">
-                      {user.firstName && (
-                        <p className="font-medium" data-testid="user-name">
-                          {user.firstName} {user.lastName}
-                        </p>
-                      )}
-                      {user.email && (
-                        <p className="w-[200px] truncate text-sm text-muted-foreground" data-testid="user-email">
-                          {user.email}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <a href="/api/logout" className="w-full" data-testid="logout-link">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Log out
-                    </a>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <>
-                <Button asChild data-testid="sign-in-button">
-                  <a href="/api/login">Sign In</a>
-                </Button>
-                <Button variant="secondary" asChild data-testid="get-started-button">
-                  <Link href="/assessment">Get Started</Link>
-                </Button>
-              </>
-            )}
+            <Button asChild>
+              <Link href="/assessment">Start Assessment</Link>
+            </Button>
 
             {/* Mobile menu */}
             <div className="md:hidden">

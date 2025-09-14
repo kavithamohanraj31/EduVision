@@ -1,0 +1,21 @@
+College_ID,College_Name,District,Courses_Offered,Cutoff,Fees,Seats,Scholarship_Available
+TN001,Government Arts College Chennai,Chennai,"B.Sc Computer Science,B.Com,B.A English",75,2000,120,Yes
+TN002,Presidency College Chennai,Chennai,"B.Sc Physics,B.Sc Chemistry,B.Com",85,2500,200,Yes
+TN003,Government College of Technology Coimbatore,Coimbatore,"B.Tech Civil,B.Tech Mechanical,B.Tech CSE",90,15000,180,Yes
+TN004,Madras Medical College Chennai,Chennai,"MBBS,BDS",95,5000,150,Yes
+TN005,Government Arts College Coimbatore,Coimbatore,"B.Sc Mathematics,B.Com,B.A Tamil",70,1800,100,Yes
+TN006,Annamalai University Chidambaram,Cuddalore,"B.Tech IT,B.Sc Biology,B.Com",80,8000,250,Yes
+TN007,Government College of Engineering Salem,Salem,"B.Tech ECE,B.Tech Mechanical,B.Tech Civil",88,12000,160,Yes
+TN008,Queen Mary's College Chennai,Chennai,"B.Sc Botany,B.Sc Zoology,B.Com",82,2200,140,Yes
+TN009,Government Arts College Trichy,Tiruchirappalli,"B.Sc Physics,B.A History,B.Com",78,2000,110,Yes
+TN010,PSG College of Technology Coimbatore,Coimbatore,"B.Tech CSE,B.Tech Mechanical,B.Tech EEE",92,25000,200,Yes
+TN011,Government College Dharmapuri,Dharmapuri,"B.Sc Computer Science,B.Com,B.A English",72,1500,90,Yes
+TN012,Bharathidasan University Trichy,Tiruchirappalli,"B.Sc Mathematics,B.Com,MBA",85,6000,180,Yes
+TN013,Government Medical College Tirunelveli,Tirunelveli,"MBBS,BDS",94,4500,100,Yes
+TN014,Government College of Engineering Tirunelveli,Tirunelveli,"B.Tech Civil,B.Tech ECE,B.Tech CSE",89,14000,150,Yes
+TN015,Sacred Heart College Tirupattur,Tirupattur,"B.Sc Chemistry,B.Com,BBA",76,3000,120,Yes
+TN016,Government Arts College Udagamandalam,Nilgiris,"B.Sc Environmental Science,B.A English,B.Com",74,1800,80,Yes
+TN017,Thiagarajar College of Engineering Madurai,Madurai,"B.Tech CSE,B.Tech Mechanical,B.Tech EEE",91,22000,190,Yes
+TN018,Government College Erode,Erode,"B.Sc Physics,B.Com,B.A Tamil",77,1900,95,Yes
+TN019,Madurai Kamaraj University Madurai,Madurai,"B.Sc Biology,B.Com,M.Sc",83,5500,170,Yes
+TN020,Government Polytechnic College Chennai,Chennai,"Diploma Mechanical,Diploma Civil,Diploma ECE",65,8000,220,Yes

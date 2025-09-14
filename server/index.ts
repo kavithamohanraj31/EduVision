@@ -1,3 +1,14 @@
+import dotenv from "dotenv";
+dotenv.config();
+
+// Set default environment variables for local development
+if (!process.env.SESSION_SECRET) {
+  process.env.SESSION_SECRET = 'local-development-secret-key';
+}
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = 'development';
+}
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
