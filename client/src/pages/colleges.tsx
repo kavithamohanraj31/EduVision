@@ -1,342 +1,88 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import { Search, Filter, MapPin, University, GraduationCap, DollarSign, Users, BookOpen, Award } from "lucide-react";
+import { Search, Filter, MapPin, University, GraduationCap, DollarSign, Users, BookOpen, Award, Loader2 } from "lucide-react";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
-// Comprehensive college data with all details
-const collegesData = [
-  {
-    id: "1",
-    name: "Indian Institute of Technology Delhi",
-    location: "New Delhi",
-    state: "Delhi",
-    type: "Public",
-    established: "1961",
-    website: "https://www.iitd.ac.in",
-    courses: [
-      "B.Tech Computer Science Engineering",
-      "B.Tech Mechanical Engineering", 
-      "B.Tech Electrical Engineering",
-      "B.Tech Civil Engineering",
-      "B.Tech Chemical Engineering",
-      "B.Tech Aerospace Engineering",
-      "M.Tech Computer Science",
-      "M.Tech Data Science",
-      "PhD in Engineering"
-    ],
-    cutoffs: {
-      general: 95.5,
-      obc: 92.0,
-      sc: 85.0,
-      st: 80.0,
-      ews: 90.0
-    },
-    fees: {
-      btech: 250000,
-      mtech: 200000,
-      phd: 50000
-    },
-    facilities: [
-      "24/7 Library",
-      "Hostel Accommodation", 
-      "Sports Complex",
-      "Research Labs",
-      "Cafeteria",
-      "Medical Center",
-      "WiFi Campus",
-      "Transportation"
-    ],
-    placement: {
-      averagePackage: "15-25 LPA",
-      highestPackage: "50+ LPA",
-      topRecruiters: ["Google", "Microsoft", "Amazon", "Apple", "Goldman Sachs"]
-    },
-    rating: 4.8,
-    totalStudents: 8000
-  },
-  {
-    id: "2", 
-    name: "All India Institute of Medical Sciences",
-    location: "New Delhi",
-    state: "Delhi",
-    type: "Public",
-    established: "1956",
-    website: "https://www.aiims.edu",
-    courses: [
-      "MBBS",
-      "MD in Internal Medicine",
-      "MD in Pediatrics", 
-      "MD in Surgery",
-      "MS in Orthopedics",
-      "MCh in Neurosurgery",
-      "DM in Cardiology",
-      "PhD in Medical Sciences"
-    ],
-    cutoffs: {
-      general: 99.5,
-      obc: 98.0,
-      sc: 96.0,
-      st: 94.0,
-      ews: 97.5
-    },
-    fees: {
-      mbbs: 25000,
-      md: 50000,
-      ms: 50000,
-      phd: 30000
-    },
-    facilities: [
-      "Super Specialty Hospital",
-      "Research Institute",
-      "Library & Digital Resources",
-      "Hostel for Students",
-      "Cafeteria",
-      "Sports Complex",
-      "Auditorium",
-      "Medical Equipment Labs"
-    ],
-    placement: {
-      averagePackage: "12-20 LPA",
-      highestPackage: "40+ LPA", 
-      topRecruiters: ["AIIMS", "Apollo Hospitals", "Fortis Healthcare", "Max Healthcare", "Government Hospitals"]
-    },
-    rating: 4.9,
-    totalStudents: 2500
-  },
-  {
-    id: "3",
-    name: "Delhi University",
-    location: "New Delhi", 
-    state: "Delhi",
-    type: "Public",
-    established: "1922",
-    website: "https://www.du.ac.in",
-    courses: [
-      "B.A English Literature",
-      "B.A Economics",
-      "B.A History",
-      "B.A Political Science",
-      "B.Com",
-      "B.Sc Mathematics",
-      "B.Sc Physics",
-      "B.Sc Chemistry",
-      "B.Sc Computer Science",
-      "M.A English",
-      "M.A Economics",
-      "M.Com",
-      "M.Sc Mathematics"
-    ],
-    cutoffs: {
-      general: 85.0,
-      obc: 80.0,
-      sc: 75.0,
-      st: 70.0,
-      ews: 82.0
-    },
-    fees: {
-      ba: 35000,
-      bcom: 35000,
-      bsc: 40000,
-      ma: 25000,
-      mcom: 25000,
-      msc: 30000
-    },
-    facilities: [
-      "Central Library",
-      "Hostel Facilities",
-      "Sports Grounds",
-      "Computer Labs",
-      "Cafeteria",
-      "Auditorium",
-      "Research Centers",
-      "Student Union"
-    ],
-    placement: {
-      averagePackage: "4-8 LPA",
-      highestPackage: "15+ LPA",
-      topRecruiters: ["Government Jobs", "Banking Sector", "Education Sector", "Media Houses", "Corporate Sector"]
-    },
-    rating: 4.2,
-    totalStudents: 150000
-  },
-  {
-    id: "4",
-    name: "St. Stephen's College",
-    location: "New Delhi",
-    state: "Delhi", 
-    type: "Private",
-    established: "1881",
-    website: "https://www.ststephens.edu",
-    courses: [
-      "B.A English Literature",
-      "B.A Economics",
-      "B.A History",
-      "B.A Philosophy",
-      "B.A Mathematics",
-      "B.Sc Physics",
-      "B.Sc Chemistry",
-      "B.Sc Mathematics",
-      "M.A English",
-      "M.A Economics"
-    ],
-    cutoffs: {
-      general: 98.0,
-      obc: 95.0,
-      sc: 90.0,
-      st: 85.0,
-      ews: 96.0
-    },
-    fees: {
-      ba: 55000,
-      bsc: 60000,
-      ma: 40000
-    },
-    facilities: [
-      "Historic Library",
-      "Hostel Accommodation",
-      "Sports Facilities",
-      "Chapel",
-      "Cafeteria",
-      "Computer Center",
-      "Auditorium",
-      "Garden Campus"
-    ],
-    placement: {
-      averagePackage: "6-12 LPA",
-      highestPackage: "25+ LPA",
-      topRecruiters: ["Civil Services", "Banking", "Media", "Education", "Corporate Sector"]
-    },
-    rating: 4.6,
-    totalStudents: 1200
-  },
-  {
-    id: "5",
-    name: "Indian Institute of Management Ahmedabad",
-    location: "Ahmedabad",
-    state: "Gujarat",
-    type: "Public", 
-    established: "1961",
-    website: "https://www.iima.ac.in",
-    courses: [
-      "MBA",
-      "PGP (Post Graduate Program)",
-      "FPM (Fellow Program in Management)",
-      "Executive MBA",
-      "PGP-FABM (Food & Agribusiness)",
-      "ePGP (Executive Post Graduate Program)"
-    ],
-    cutoffs: {
-      general: 99.0,
-      obc: 97.0,
-      sc: 95.0,
-      st: 92.0,
-      ews: 98.0
-    },
-    fees: {
-      mba: 2500000,
-      pgp: 2500000,
-      fpm: 1000000,
-      executive: 3000000
-    },
-    facilities: [
-      "World-class Library",
-      "Hostel Accommodation",
-      "Sports Complex",
-      "Conference Halls",
-      "Cafeteria",
-      "Banking Services",
-      "Medical Center",
-      "Transportation"
-    ],
-    placement: {
-      averagePackage: "25-35 LPA",
-      highestPackage: "80+ LPA",
-      topRecruiters: ["McKinsey", "BCG", "Bain", "Goldman Sachs", "JP Morgan", "Amazon", "Google"]
-    },
-    rating: 4.9,
-    totalStudents: 1200
-  },
-  {
-    id: "6",
-    name: "Jadavpur University",
-    location: "Kolkata",
-    state: "West Bengal",
-    type: "Public",
-    established: "1955",
-    website: "https://www.jaduniv.edu.in",
-    courses: [
-      "B.Tech Computer Science",
-      "B.Tech Mechanical Engineering",
-      "B.Tech Electrical Engineering",
-      "B.A English",
-      "B.A Bengali",
-      "B.Sc Physics",
-      "B.Sc Chemistry",
-      "M.Tech Computer Science",
-      "M.A English",
-      "M.Sc Physics"
-    ],
-    cutoffs: {
-      general: 88.0,
-      obc: 83.0,
-      sc: 78.0,
-      st: 73.0,
-      ews: 85.0
-    },
-    fees: {
-      btech: 120000,
-      ba: 25000,
-      bsc: 30000,
-      mtech: 100000,
-      ma: 20000,
-      msc: 25000
-    },
-    facilities: [
-      "Central Library",
-      "Hostel Facilities",
-      "Sports Ground",
-      "Computer Labs",
-      "Cafeteria",
-      "Auditorium",
-      "Research Labs",
-      "Student Activities Center"
-    ],
-    placement: {
-      averagePackage: "6-15 LPA",
-      highestPackage: "30+ LPA",
-      topRecruiters: ["TCS", "Infosys", "Wipro", "Government Jobs", "Research Organizations"]
-    },
-    rating: 4.4,
-    totalStudents: 15000
-  }
-];
+// Define the College interface based on Firebase data structure
+interface College {
+  id: string;
+  collegeId?: string;
+  name: string;
+  district?: string;
+  coursesOffered?: string[];
+  cutoff?: number;
+  fees?: number;
+  seats?: number;
+  scholarshipAvailable?: boolean;
+  state?: string;
+  type?: string;
+  createdAt?: any;
+  updatedAt?: any;
+}
 
 export default function Colleges() {
+  const [colleges, setColleges] = useState<College[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedState, setSelectedState] = useState<string>("all");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedCourse, setSelectedCourse] = useState<string>("all");
 
-  // Get unique states and courses for filters
-  const states = ["all", ...new Set(collegesData.map(college => college.state))];
-  const types = ["all", ...new Set(collegesData.map(college => college.type))];
-  const courses = ["all", ...new Set(collegesData.flatMap(college => college.courses))];
+  // Fetch colleges from Firebase
+  useEffect(() => {
+    const fetchColleges = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const collegesRef = collection(db, "colleges");
+        const q = query(collegesRef, orderBy("name"));
+        const querySnapshot = await getDocs(q);
+        
+        const collegesData: College[] = [];
+        querySnapshot.forEach((doc) => {
+          collegesData.push({
+            id: doc.id,
+            ...doc.data()
+          } as College);
+        });
+        
+        setColleges(collegesData);
+      } catch (err) {
+        console.error("Error fetching colleges:", err);
+        setError("Failed to load colleges. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchColleges();
+  }, []);
+
+  // Get unique states, types, and courses for filters
+  const states = ["all", ...new Set(colleges.map(college => college.state).filter(Boolean))];
+  const types = ["all", ...new Set(colleges.map(college => college.type).filter(Boolean))];
+  const courses = ["all", ...new Set(colleges.flatMap(college => college.coursesOffered || []).filter(Boolean))];
 
   // Filter colleges based on search and filters
-  const filteredColleges = collegesData.filter(college => {
+  const filteredColleges = colleges.filter(college => {
     const matchesSearch = college.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         college.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         college.courses.some(course => course.toLowerCase().includes(searchQuery.toLowerCase()));
+                         (college.district && college.district.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                         (college.coursesOffered && college.coursesOffered.some(course => course.toLowerCase().includes(searchQuery.toLowerCase())));
     
     const matchesState = selectedState === "all" || college.state === selectedState;
     const matchesType = selectedType === "all" || college.type === selectedType;
-    const matchesCourse = selectedCourse === "all" || college.courses.some(course => course === selectedCourse);
+    const matchesCourse = selectedCourse === "all" || (college.coursesOffered && college.coursesOffered.some(course => course === selectedCourse));
 
     return matchesSearch && matchesState && matchesType && matchesCourse;
   });
@@ -347,6 +93,103 @@ export default function Colleges() {
     setSelectedType("all");
     setSelectedCourse("all");
   };
+
+  // Loading skeleton component
+  const CollegeCardSkeleton = () => (
+    <Card className="hover:shadow-lg transition-shadow">
+      <CardHeader>
+        <div className="flex justify-between items-start">
+          <div className="space-y-2">
+            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-6 w-16" />
+            <Skeleton className="h-4 w-12" />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-1/3" />
+          <div className="grid grid-cols-2 gap-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-1/3" />
+          <div className="flex gap-2">
+            <Skeleton className="h-6 w-20" />
+            <Skeleton className="h-6 w-24" />
+            <Skeleton className="h-6 w-16" />
+          </div>
+        </div>
+        <Skeleton className="h-10 w-full" />
+      </CardContent>
+    </Card>
+  );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+              College Directory
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Loading colleges from our database...
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <CollegeCardSkeleton key={i} />
+            ))}
+          </div>
+        </div>
+
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center">
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+              College Directory
+            </h1>
+            <Card className="max-w-md mx-auto">
+              <CardContent className="p-6 text-center">
+                <div className="w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Loader2 className="h-6 w-6 text-destructive" />
+                </div>
+                <h3 className="font-semibold mb-2">Error Loading Colleges</h3>
+                <p className="text-sm text-muted-foreground mb-4">{error}</p>
+                <Button onClick={() => window.location.reload()}>
+                  Try Again
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -359,7 +202,7 @@ export default function Colleges() {
             College Directory
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Discover top colleges with detailed information about courses, cutoffs, fees, and facilities.
+            Discover colleges from Tamil Nadu with detailed information about courses, cutoffs, fees, and facilities.
           </p>
         </div>
 
@@ -382,7 +225,7 @@ export default function Colleges() {
                     <Input
                       id="search"
                       type="text"
-                      placeholder="Search by college name, location, or course..."
+                      placeholder="Search by college name, district, or course..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="pl-10"
@@ -485,7 +328,7 @@ export default function Colleges() {
             <div className="flex items-center gap-2">
               <Filter className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">
-                Showing detailed college information
+                Showing college information from Tamil Nadu
               </span>
             </div>
           </div>
@@ -501,133 +344,91 @@ export default function Colleges() {
                     <CardTitle className="text-xl mb-2">{college.name}</CardTitle>
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <MapPin className="h-4 w-4" />
-                      <span>{college.location}, {college.state}</span>
+                      <span>{college.district || 'Tamil Nadu'}, {college.state || 'Tamil Nadu'}</span>
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     <Badge variant={college.type === "Public" ? "default" : "secondary"}>
-                      {college.type}
+                      {college.type || 'College'}
                     </Badge>
+                    {college.scholarshipAvailable && (
                     <div className="flex items-center gap-1">
                       <Award className="h-4 w-4 text-yellow-500" />
-                      <span className="text-sm font-medium">{college.rating}/5</span>
+                        <span className="text-sm font-medium">Scholarship Available</span>
                     </div>
+                    )}
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Basic Info */}
                 <div className="grid grid-cols-2 gap-4 text-sm">
+                  {college.cutoff && (
                   <div className="flex items-center gap-2">
-                    <University className="h-4 w-4 text-muted-foreground" />
-                    <span>Est. {college.established}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <span>{college.totalStudents.toLocaleString()} students</span>
-                  </div>
-                </div>
-
-                {/* Cutoffs */}
-                <div>
-                  <h4 className="font-semibold mb-2 flex items-center gap-2">
-                    <GraduationCap className="h-4 w-4" />
-                    Cutoff Percentages
-                  </h4>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>General:</span>
-                      <span className="font-medium">{college.cutoffs.general}%</span>
+                      <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                      <span>Cutoff: {college.cutoff}%</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>OBC:</span>
-                      <span className="font-medium">{college.cutoffs.obc}%</span>
+                  )}
+                  {college.seats && (
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <span>{college.seats} seats</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>SC:</span>
-                      <span className="font-medium">{college.cutoffs.sc}%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>ST:</span>
-                      <span className="font-medium">{college.cutoffs.st}%</span>
-                    </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Fees */}
+                {college.fees && (
                 <div>
                   <h4 className="font-semibold mb-2 flex items-center gap-2">
                     <DollarSign className="h-4 w-4" />
                     Annual Fees
                   </h4>
-                  <div className="space-y-1 text-sm">
-                    {Object.entries(college.fees).map(([course, fee]) => (
-                      <div key={course} className="flex justify-between">
-                        <span className="capitalize">{course}:</span>
-                        <span className="font-medium">₹{fee.toLocaleString()}</span>
+                    <div className="text-sm">
+                      <span className="font-medium">₹{college.fees.toLocaleString()}</span>
                       </div>
-                    ))}
                   </div>
-                </div>
+                )}
 
                 {/* Courses */}
+                {college.coursesOffered && college.coursesOffered.length > 0 && (
                 <div>
                   <h4 className="font-semibold mb-2 flex items-center gap-2">
                     <BookOpen className="h-4 w-4" />
-                    Popular Courses
+                      Available Courses
                   </h4>
                   <div className="flex flex-wrap gap-1">
-                    {college.courses.slice(0, 4).map((course, index) => (
+                      {college.coursesOffered.slice(0, 4).map((course, index) => (
                       <Badge key={index} variant="outline" className="text-xs">
                         {course}
                       </Badge>
                     ))}
-                    {college.courses.length > 4 && (
+                      {college.coursesOffered.length > 4 && (
                       <Badge variant="outline" className="text-xs">
-                        +{college.courses.length - 4} more
+                          +{college.coursesOffered.length - 4} more
                       </Badge>
                     )}
                   </div>
                 </div>
+                )}
 
-                {/* Placement Info */}
+                {/* Scholarship Info */}
+                {college.scholarshipAvailable && (
                 <div>
-                  <h4 className="font-semibold mb-2">Placement Highlights</h4>
-                  <div className="space-y-1 text-sm">
-                    <div className="flex justify-between">
-                      <span>Average Package:</span>
-                      <span className="font-medium text-green-600">{college.placement.averagePackage}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Highest Package:</span>
-                      <span className="font-medium text-green-600">{college.placement.highestPackage}</span>
+                    <h4 className="font-semibold mb-2 flex items-center gap-2">
+                      <Award className="h-4 w-4" />
+                      Scholarship Information
+                    </h4>
+                    <div className="text-sm text-green-600">
+                      <span className="font-medium">Scholarship opportunities available</span>
                     </div>
                   </div>
-                </div>
-
-                {/* Facilities */}
-                <div>
-                  <h4 className="font-semibold mb-2">Key Facilities</h4>
-                  <div className="flex flex-wrap gap-1">
-                    {college.facilities.slice(0, 6).map((facility, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {facility}
-                      </Badge>
-                    ))}
-                    {college.facilities.length > 6 && (
-                      <Badge variant="secondary" className="text-xs">
-                        +{college.facilities.length - 6} more
-                      </Badge>
-                    )}
-                  </div>
-                </div>
+                )}
 
                 {/* Action Button */}
                 <div className="pt-4 border-t">
-                  <Button asChild className="w-full">
-                    <a href={college.website} target="_blank" rel="noopener noreferrer">
-                      Visit Official Website
-                    </a>
+                  <Button variant="outline" className="w-full" disabled>
+                    Contact College for More Details
                   </Button>
                 </div>
               </CardContent>
@@ -654,7 +455,7 @@ export default function Colleges() {
                 </div>
                 <h4 className="font-semibold mb-2">Location-Based Search</h4>
                 <p className="text-sm text-muted-foreground">
-                  Find colleges by state, city, or specific location with easy filtering options.
+                  Find colleges by district, state, or specific location with easy filtering options.
                 </p>
               </div>
               <div>
